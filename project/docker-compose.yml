@@ -22,9 +22,7 @@ services:
       - N8N_COMMUNITY_PACKAGES_ENABLED=true
       # 允许通过内网访问 Paper API
       - NODE_FUNCTION_ALLOW_EXTERNAL=*
-      # 不设置 WEBHOOK_TUNNEL_URL / N8N_EDITOR_BASE_URL
-      # 设置这些会导致 n8n 强制校验 Origin，在 Codespaces 代理环境下引发 WebSocket 断连
-      # 本项目使用 Schedule Trigger + 内部 HTTP 调用，无需公开 Webhook
+      # 本项目使用 Schedule Trigger + 内部 HTTP 调用，无需配置 Webhook 公开地址
     depends_on:
       chromadb:
         condition: service_healthy
