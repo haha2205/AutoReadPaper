@@ -1,0 +1,156 @@
+{
+  "name": "AutoReadPaper — 全自动论文推送流水线",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24,
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "node_schedule",
+      "name": "每日 09:00 触发",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://paper-api:8080/api/pipeline/run",
+        "options": {
+          "timeout": 300000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "id": "node_pipeline",
+      "name": "执行完整流水线",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [320, 300],
+      "notes": "调用 Paper API 执行: 搜索→去重→AI总结→向量存储→推送"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "id": "check_new_papers",
+              "leftValue": "={{ $json.new_papers_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ]
+        }
+      },
+      "id": "node_check",
+      "name": "是否有新论文",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [540, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 记录执行日志\nconst result = $input.first().json;\nconsole.log(`[AutoReadPaper] Pipeline completed: ${result.new_papers_count} new papers, push results: ${JSON.stringify(result.push_results)}`);\nreturn [{ json: { status: 'completed', ...result, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "node_log_success",
+      "name": "记录成功日志",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [760, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 无新论文时记录日志\nconsole.log('[AutoReadPaper] No new papers found this run.');\nreturn [{ json: { status: 'no_new_papers', timestamp: new Date().toISOString() } }];"
+      },
+      "id": "node_log_empty",
+      "name": "无新论文日志",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [760, 420]
+    }
+  ],
+  "connections": {
+    "每日 09:00 触发": {
+      "main": [
+        [
+          {
+            "node": "执行完整流水线",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "执行完整流水线": {
+      "main": [
+        [
+          {
+            "node": "是否有新论文",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "是否有新论文": {
+      "main": [
+        [
+          {
+            "node": "记录成功日志",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "无新论文日志",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "meta": {
+    "templateCreatedBy": "AutoReadPaper",
+    "instanceId": "autoreadpaper"
+  },
+  "pinData": {},
+  "versionId": "1.0.0",
+  "triggerCount": 1,
+  "tags": [
+    {
+      "createdAt": "2026-03-09T00:00:00.000Z",
+      "updatedAt": "2026-03-09T00:00:00.000Z",
+      "id": "tag_autoreadpaper",
+      "name": "AutoReadPaper"
+    }
+  ]
+}

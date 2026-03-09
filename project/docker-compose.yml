@@ -1,0 +1,101 @@
+
+services:
+  # ─────────────────────────────────────────
+  # n8n 工作流自动化平台
+  # ─────────────────────────────────────────
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: autoreadpaper_n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./workflows:/home/node/workflows:ro
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - TZ=Asia/Shanghai
+      - GENERIC_TIMEZONE=Asia/Shanghai
+      - N8N_COMMUNITY_PACKAGES_ENABLED=true
+      # 允许通过内网访问 Paper API
+      - NODE_FUNCTION_ALLOW_EXTERNAL=*
+      # 不设置 WEBHOOK_TUNNEL_URL / N8N_EDITOR_BASE_URL
+      # 设置这些会导致 n8n 强制校验 Origin，在 Codespaces 代理环境下引发 WebSocket 断连
+      # 本项目使用 Schedule Trigger + 内部 HTTP 调用，无需公开 Webhook
+    depends_on:
+      chromadb:
+        condition: service_healthy
+      paper-api:
+        condition: service_started   # 不等待 paper-api 健康检查，避免构建耗时阻塞 n8n
+    networks:
+      - autoreadpaper_net
+
+  # ─────────────────────────────────────────
+  # ChromaDB 向量数据库
+  # ─────────────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:0.5.23   # 锁定版本，与 Python 客户端 chromadb==0.5.15 兼容
+    container_name: autoreadpaper_chromadb
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/data
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+      - CHROMA_SERVER_AUTHN_PROVIDER=chromadb.auth.token_authn.TokenAuthenticationServerProvider
+      - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_AUTH_TOKEN:-changeme}
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/8000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - autoreadpaper_net
+
+  # ─────────────────────────────────────────
+  # Paper API — 论文搜索 + AI 总结后端服务
+  # ─────────────────────────────────────────
+  paper-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autoreadpaper_api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config:/app/config:ro
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
+      - DEEPSEEK_MODEL=${DEEPSEEK_MODEL:-deepseek-chat}
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - CHROMA_AUTH_TOKEN=${CHROMA_AUTH_TOKEN:-changeme}
+      - TZ=Asia/Shanghai
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - autoreadpaper_net
+
+volumes:
+  n8n_data:
+    driver: local
+  chroma_data:
+    driver: local
+
+networks:
+  autoreadpaper_net:
+    driver: bridge

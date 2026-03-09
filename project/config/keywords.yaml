@@ -1,0 +1,84 @@
+# ============================================================
+# 研究方向关键词配置文件
+# - 每个 research_area 代表一个研究方向
+# - 支持多组关键词，每组关键词独立搜索后合并去重
+# - sources: 指定该方向在哪些来源中搜索
+# - max_results: 覆盖全局默认值
+# ============================================================
+
+research_areas:
+
+  # ── 大型语言模型 Agent ─────────────────────────────────
+  - name: "LLM Agent"
+    enabled: true
+    keywords:
+      - "large language model agent"
+      - "LLM autonomous agent"
+      - "agentic AI planning"
+      - "tool use language model"
+      - "multi-agent LLM"
+    sources:
+      - arxiv
+      - semantic_scholar
+    max_results: 10
+    # arXiv 分类限制（可选，留空则搜全库）
+    arxiv_categories:
+      - cs.AI
+      - cs.LG
+      - cs.CL
+
+  # ── 检索增强生成 (RAG) ────────────────────────────────
+  - name: "RAG"
+    enabled: true
+    keywords:
+      - "retrieval augmented generation"
+      - "RAG language model"
+      - "knowledge grounding LLM"
+      - "dense retrieval QA"
+    sources:
+      - arxiv
+      - semantic_scholar
+    max_results: 8
+    arxiv_categories:
+      - cs.IR
+      - cs.CL
+      - cs.AI
+
+  # ── eVTOL 多目标优化 ──────────────────────────────────
+  - name: "eVTOL Optimization"
+    enabled: true
+    keywords:
+      - "eVTOL multi-objective optimization"
+      - "urban air mobility trajectory optimization"
+      - "electric vertical takeoff energy efficiency"
+      - "eVTOL path planning"
+    sources:
+      - arxiv
+      - semantic_scholar
+    max_results: 5
+    arxiv_categories:
+      - eess.SY
+      - cs.RO
+
+  # ── 示例：可根据自己需求添加更多研究方向 ──────────────
+  # - name: "Diffusion Models"
+  #   enabled: false
+  #   keywords:
+  #     - "diffusion model image generation"
+  #     - "score matching denoising"
+  #   sources:
+  #     - arxiv
+  #   max_results: 8
+
+# ── 全局关键词过滤（二次过滤，至少命中一个才保留） ──────
+# 留空列表则不启用二次过滤
+secondary_filter:
+  enabled: false
+  # 命中任意一个关键词则保留（大小写不敏感）
+  include_any:
+    - "agent"
+    - "optimization"
+    - "language model"
+  # 命中任意一个关键词则剔除（可用于过滤不相关内容）
+  exclude_any:
+    - "survey only"

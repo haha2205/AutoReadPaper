@@ -1,0 +1,13 @@
+# 敏感配置文件，禁止提交
+**/.env
+.env
+
+# 运行时产生的文件
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.DS_Store
