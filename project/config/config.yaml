@@ -1,100 +1,75 @@
-# AutoReadPaper 主配置文件
-
 app:
-  name: "AutoReadPaper"
-  version: "1.0.0"
-  log_level: "INFO"  # DEBUG / INFO / WARNING / ERROR
-
-# ── 论文搜索配置 ────────────────────────────────────────────
-search:
-  # 搜索结果缓存时间（秒），防止频繁重复调用
-  cache_ttl: 3600
-  # 单次搜索最大结果数（每个关键词每个来源）
-  default_max_results: 10
-  # 请求间隔（秒），避免触发速率限制
-  request_delay: 1.5
-  # 并发搜索任务数
-  concurrency: 3
-
-  sources:
-    arxiv:
-      enabled: true
-      # arXiv 分类过滤（留空则不过滤），参考: https://arxiv.org/category_taxonomy
-      # 例: cs.AI, cs.LG, eess.SY
-      categories: []
-
-    pubmed:
-      enabled: true
-      # 搜索最近 N 天内的文章
-      days_back: 7
-
-    semantic_scholar:
-      enabled: true
-      # 只返回有摘要的论文
-      require_abstract: true
-      # 最小引用数过滤（设为 0 则不过滤）
-      min_citation_count: 0
-
-    biorxiv:
-      enabled: false
-      # bioRxiv 服务器类型: biorxiv 或 medrxiv
-      server: "biorxiv"
-      days_back: 7
-
-# ── AI 总结配置 ─────────────────────────────────────────────
-summarizer:
-  # 每批处理的论文数量（避免单次 API 调用过大）
-  batch_size: 5
-  # 总结最大 Token 数
-  max_tokens: 500
-  # 温度参数（0.0-1.0，越低越稳定）
-  temperature: 0.3
-  # 总结语言
-  language: "zh"  # zh = 中文, en = 英文
-  # 提示词模板（{title} 和 {abstract} 为占位符）
-  prompt_template: |
-    你是一名资深科研助手，擅长快速提取论文的核心价值。
-    请用**250字以内的中文**总结以下论文，包含三个部分：
-    1. **核心问题**：这篇论文解决了什么问题？
-    2. **主要方法**：使用了什么关键技术或方法？
-    3. **主要贡献**：最重要的结论或创新点是什么？
-
-    论文标题：{title}
-    论文摘要：{abstract}
-
-# ── 向量存储配置 ────────────────────────────────────────────
-vector_store:
-  # ChromaDB Collection 名称
-  collection_name: "papers"
-  # 本地 Embedding 模型（首次运行会自动下载，约 90MB）
-  # 可选: paraphrase-multilingual-MiniLM-L12-v2 (多语言)
-  #       all-MiniLM-L6-v2 (英文，速度更快)
-  embedding_model: "paraphrase-multilingual-MiniLM-L12-v2"
-  # 相似度去重阈值（0~1，越高越严格，建议 0.92~0.96）
-  dedup_similarity_threshold: 0.94
-  # 语义搜索返回结果数
-  search_top_k: 10
-
-# ── 推送配置 ────────────────────────────────────────────────
+  log_level: INFO
+  name: AutoReadPaper
+  version: 1.0.0
 push:
-  # 每次推送最多发送的论文数，防止消息过长
-  max_papers_per_push: 20
-  # 启用的推送渠道（在 .env 中配置对应的密钥后再启用）
   channels:
-    email: true          # ✅ Outlook SMTP 推送
-    wecom: false
+    email: true
     feishu: false
+    github_issue: true
     telegram: false
-    github_issue: true   # ✅ GitHub Issues 归档
+    wecom: false
+  max_papers_per_push: 20
+  message_template: '## 📄 {title}
 
-  # 消息格式模板（支持 Markdown）
-  message_template: |
-    ## 📄 {title}
     **来源**: {source} | **日期**: {published_date}
+
     **链接**: {url}
+
     **作者**: {authors}
 
+
     **🤖 AI 速览**:
+
     {ai_summary}
 
+
     ---
+
+    '
+search:
+  cache_ttl: 3600
+  concurrency: 1
+  default_max_results: 10
+  request_delay: 3.0
+  sources:
+    arxiv:
+      categories: []
+      enabled: true
+    biorxiv:
+      days_back: 7
+      enabled: false
+      server: biorxiv
+    pubmed:
+      days_back: 7
+      enabled: true
+    semantic_scholar:
+      enabled: false
+      min_citation_count: 0
+      require_abstract: true
+summarizer:
+  batch_size: 5
+  language: zh
+  max_tokens: 500
+  prompt_template: '你是一名资深科研助手，擅长快速提取论文的核心价值。
+
+    请用**250字以内的中文**总结以下论文，包含三个部分：
+
+    1. **核心问题**：这篇论文解决了什么问题？
+
+    2. **主要方法**：使用了什么关键技术或方法？
+
+    3. **主要贡献**：最重要的结论或创新点是什么？
+
+
+    论文标题：{title}
+
+    论文摘要：{abstract}
+
+    '
+  temperature: 0.3
+vector_store:
+  collection_name: papers
+  dedup_similarity_threshold: 0.94
+  embedding_model: paraphrase-multilingual-MiniLM-L12-v2
+  search_top_k: 10

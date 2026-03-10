@@ -46,7 +46,7 @@ research_areas:
 
   # ── eVTOL 多目标优化 ──────────────────────────────────
   - name: "eVTOL Optimization"
-    enabled: true
+    enabled: false
     keywords:
       - "eVTOL multi-objective optimization"
       - "urban air mobility trajectory optimization"
@@ -61,14 +61,91 @@ research_areas:
       - cs.RO
 
   # ── 示例：可根据自己需求添加更多研究方向 ──────────────
-  # - name: "Diffusion Models"
-  #   enabled: false
-  #   keywords:
-  #     - "diffusion model image generation"
-  #     - "score matching denoising"
-  #   sources:
-  #     - arxiv
-  #   max_results: 8
+  - name: "Diffusion Models"
+    enabled: false
+    keywords:
+       - "diffusion model image generation"
+       - "score matching denoising"
+    sources:
+       - arxiv
+    max_results: 8
+
+  - name: "Computer Vision"
+    enabled: false
+    keywords:
+      - "object detection"
+      - "semantic segmentation"
+    sources:
+      - arxiv
+    max_results: 10
+
+  # ── 认知科学 ──────────────────────────────────────────
+  - name: "Cognitive Science"
+    enabled: true
+    keywords:
+      - "cognitive neuroscience"
+      - "computational cognition"
+      - "cognitive architecture"
+      - "cognitive modeling"
+      - "embodied cognition"
+    sources:
+      - arxiv
+      - pubmed
+    max_results: 10
+    arxiv_categories:
+      - q-bio.NC  # Neurons and Cognition
+      - cs.AI
+      - cs.HC
+
+  # ── 脑神经科学 ────────────────────────────────────────
+  - name: "Neuroscience"
+    enabled: true
+    keywords:
+      - "neural networks brain"
+      - "neuroimaging fMRI"
+      - "brain connectivity"
+      - "neural computation"
+      - "brain computer interface"
+    sources:
+      - arxiv
+      - pubmed
+    max_results: 10
+    arxiv_categories:
+      - q-bio.NC
+      - cs.NE  # Neural and Evolutionary Computing
+
+  # ── 心智哲学与人工智能哲学 ────────────────────────────
+  - name: "Philosophy of Mind & AI"
+    enabled: true
+    keywords:
+      - "philosophy of mind"
+      - "consciousness theory"
+      - "artificial consciousness"
+      - "philosophy of artificial intelligence"
+      - "philosophy cognitive science"
+    sources:
+      - arxiv
+    max_results: 8
+    arxiv_categories:
+      - cs.AI
+      - cs.CY  # Computers and Society
+
+  # ── 人脑功能与机制 ────────────────────────────────────
+  - name: "Human Brain Function"
+    enabled: true
+    keywords:
+      - "human brain function"
+      - "brain imaging analysis"
+      - "neural mechanisms cognition"
+      - "cortical processing"
+      - "brain network dynamics"
+    sources:
+      - arxiv
+      - pubmed
+    max_results: 10
+    arxiv_categories:
+      - q-bio.NC
+      - physics.bio-ph  # Biological Physics
 
 # ── 全局关键词过滤（二次过滤，至少命中一个才保留） ──────
 # 留空列表则不启用二次过滤

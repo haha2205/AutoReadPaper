@@ -17,7 +17,10 @@
       "name": "每日 09:00 触发",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [100, 300]
+      "position": [
+        100,
+        300
+      ]
     },
     {
       "parameters": {
@@ -40,7 +43,10 @@
       "name": "执行完整流水线",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [320, 300],
+      "position": [
+        320,
+        300
+      ],
       "notes": "调用 Paper API 执行: 搜索→去重→AI总结→向量存储→推送"
     },
     {
@@ -66,7 +72,10 @@
       "name": "是否有新论文",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [540, 300]
+      "position": [
+        540,
+        300
+      ]
     },
     {
       "parameters": {
@@ -76,7 +85,10 @@
       "name": "记录成功日志",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [760, 200]
+      "position": [
+        760,
+        200
+      ]
     },
     {
       "parameters": {
@@ -86,7 +98,10 @@
       "name": "无新论文日志",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [760, 420]
+      "position": [
+        760,
+        420
+      ]
     }
   ],
   "connections": {
@@ -130,27 +145,5 @@
         ]
       ]
     }
-  },
-  "settings": {
-    "executionOrder": "v1",
-    "saveManualExecutions": true,
-    "callerPolicy": "workflowsFromSameOwner",
-    "errorWorkflow": ""
-  },
-  "staticData": null,
-  "meta": {
-    "templateCreatedBy": "AutoReadPaper",
-    "instanceId": "autoreadpaper"
-  },
-  "pinData": {},
-  "versionId": "1.0.0",
-  "triggerCount": 1,
-  "tags": [
-    {
-      "createdAt": "2026-03-09T00:00:00.000Z",
-      "updatedAt": "2026-03-09T00:00:00.000Z",
-      "id": "tag_autoreadpaper",
-      "name": "AutoReadPaper"
-    }
-  ]
+  }
 }
